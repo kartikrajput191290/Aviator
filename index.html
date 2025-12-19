@@ -520,6 +520,7 @@ window.toggleAuthForm = toggleAuthForm;
   let autoBetCount = 0;
   let roundHistory = [];
   let aviatorGraphData = [];
+  let aviatorCrashHistory = [];
   let loginTimeout = null;
   // ...existing code...
 
@@ -1315,7 +1316,7 @@ window.toggleAuthForm = toggleAuthForm;
         } else {
           show('authPanel');
           hide('gameArea');
-          hidei;('historyList');
+          hide('historyList');
           hide('transactionList');
           hide('depositHistoryPanel');
           hide('withdrawHistoryPanel');
