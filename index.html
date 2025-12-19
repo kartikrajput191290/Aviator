@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SkyVault Aviator</title>
+  <style>
+    :root {
+      --main-bg: #181818;
+      --panel-bg: #232323;
+      --accent: orange;
+      --accent-dark: #ffb84d;
+      --text: #fff;
+      --danger: #ff6666;
+      --success: #4caf50;
+      --shadow: 0 2px 10px rgba(255,153,0,0.1);
+      --radius: 14px;
+      --transition: 0.2s cubic-bezier(.4,0,.2,1);
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--main-bg) 0%, var(--panel-bg) 100%);
+      color: var(--text);
+      font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+      box-sizing: border-box;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    header {
+      width: 100vw;
+      background: #111;
+      padding: 18px 0 12px 0;
+      text-align: center;
+      font-size: 2.2rem;
+      font-weight: bold;
+      color: var(--accent);
+      box-shadow: var(--shadow);
+      z-index: 100;
+      position: fixed;
+      top: 0;
+      left: 0;
+      letter-spacing: 2px;
+      user-select: none;
+    }
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      width: 100vw;
+      margin-top: 80px;
+    }
+    .centered-panel {
+      background: rgba(0,0,0,0.8);
+      border-radius: var(--radius);
+      box-shadow: 0 0 18px var(--accent);
+      padding: 36px 24px 28px 24px;
+      margin-top: 30px;
+      width: 100%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.7s;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: none; }
+    }
+    .form-title {
+      color: var(--accent);
+      font-size: 1.6rem;
+      font-weight: bold;
+      margin-bottom: 18px;
+      letter-spacing: 1px;
+    }
+    .input-group {
+      width: 100%;
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .input-group label {
+      font-size: 1rem;
+      margin-bottom: 4px;
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 7px;
+      border: none;
+      font-size: 1.1rem;
+      background: #222;
+      color: var(--text);
+      margin-bottom: 2px;
+      outline: none;
+      box-shadow: 0 0 0 1.5px var(--accent-dark) inset;
+      transition: box-shadow var(--transition);
+    }
+    .input-group input:focus {
+      box-shadow: 0 0 0 2.5px var(--accent) inset;
+    }
+    .form-btn {
+      width: 100%;
+      padding: 14px;
+      font-size: 1.15rem;
+      background: var(--accent);
+      color: #181818;
+      border-radius: 8px;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+      margin-bottom: 8px;
+      transition: background var(--transition);
+    }
+    .form-btn:disabled {
+      background: #888;
+      color: #222;
+      cursor: not-allowed;
+    }
+    .form-btn:hover:not(:disabled) {
+      background: var(--accent-dark);
+    }
+    .toggle-link {
+      color: var(--accent);
+      cursor: pointer;
+      text-align: right;
+      font-size: 1rem;
+      margin-top: 0;
+      margin-bottom: 8px;
+      align-self: flex-end;
+      text-decoration: underline;
+    }
+    .error-msg {
+      color: var(--danger);
+      font-size: 1rem;
+      margin-bottom: 8px;
+      min-height: 22px;
+      text-align: center;
+      width: 100%;
+    }
+    .success-msg {
+      color: var(--success);
+      font-size: 1rem;
+      margin-bottom: 8px;
+      min-height: 22px;
+      text-align: center;
+      width: 100%;
+    }
+    /* Game Area */
+    .game-area {
+      width: 100%;
+      max-width: 520px;
+      background: rgba(0,0,0,0.85);
+      border-radius: 20px;
+      box-shadow: 0 4px 24px var(--accent-dark);
+      padding: 36px 20px 40px 20px;
+      margin: 0 auto 30px auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeIn 0.7s;
+    }
+    .top-bar {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+    .balance {
+      font-size: 1.25rem;
+      color: var(--text);
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+    .admin-icon {
+      font-size: 1.7rem;
+      color: var(--accent);
+      cursor: pointer;
+      margin-left: 12px;
+      display: none;
+      transition: color var(--transition);
+    }
+    .admin-icon.visible {
+      display: inline-block;
+    }
+    .multiplier-anim {
+      font-size: 3.5rem;
+      font-weight: bold;
+      color: var(--accent);
+      text-shadow: 0 0 18px var(--accent);
+      margin-bottom: 18px;
+      letter-spacing: 2px;
+      transition: color var(--transition);
+      animation: pop 0.7s;
+    }
+    @keyframes pop {
+      0% { transform: scale(0.7); opacity: 0.5; }
+      60% { transform: scale(1.15); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+    .bet-controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 18px;
+    }
+    .bet-controls input[type="number"] {
+      padding: 12px;
+      font-size: 1.2rem;
+      border-radius: 8px;
+      border: none;
+      margin-bottom: 12px;
+      width: 80%;
+      background: #222;
+      color: #fff;
+    }
+    .bet-controls button {
+      width: 80%;
+      padding: 14px;
+      font-size: 1.2rem;
+      background: var(--accent);
+      color: #181818;
+      border-radius: 8px;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      margin-bottom: 8px;
+      transition: background var(--transition);
+    }
+    .bet-controls button:disabled {
+      background: #888;
+      color: #222;
+      cursor: not-allowed;
+    }
+    .bet-controls button:hover:not(:disabled) {
+      background: var(--accent-dark);
+    }
+    .auto-bet-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      width: 100%;
+      justify-content: center;
+    }
+    .auto-bet-controls label {
+      color: var(--accent);
+      font-weight: 500;
+      font-size: 1.1rem;
+    }
+    .auto-bet-controls input[type="number"] {
+      width: 70px;
+      margin-left: 8px;
+    }
+    .history-list, .transaction-list {
+      width: 100%;
+      max-width: 520px;
+      background: #222;
+      border-radius: 14px;
+      padding: 18px;
+      margin: 18px auto;
+      box-shadow: 0 2px 12px var(--accent-dark);
+      color: #fff;
+      font-size: 1rem;
+      animation: fadeIn 0.7s;
+    }
+    .history-list h3, .transaction-list h3 {
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    /* Admin Panel */
+    .admin-panel {
+      background: #222;
+      border-radius: 12px;
+      padding: 18px;
+      margin: 18px 0 0 0;
+      box-shadow: 0 2px 12px var(--accent-dark);
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 340px;
+      animation: fadeIn 0.7s;
+    }
+    .admin-panel.visible {
+      display: flex;
+    }
+    .admin-panel label {
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .admin-panel input, .admin-panel button {
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      margin-top: 6px;
+      font-size: 1rem;
+    }
+    .admin-panel button {
+      background: var(--accent);
+      color: #181818;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background var(--transition);
+    }
+    .admin-panel button:hover {
+      background: var(--accent-dark);
+    }
+    /* Responsive */
+    @media (max-width: 700px) {
+      .game-area, .history-list, .transaction-list {
+        max-width: 98vw;
+        padding: 10px 6px 18px 6px;
+        border-radius: 10px;
+      }
+      .centered-panel {
+        max-width: 98vw;
+        padding: 18px 4vw;
+        border-radius: 10px;
+      }
+      main {
+        margin-top: 60px;
+      }
+    }
+    .hide {
+      display: none !important;
+    }
+    .show {
+      display: block !important;
+    }
+  </style>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+</head>
+<body>
+  <header>SkyVault Aviator</header>
+  <main>
+    <!-- Login/Signup Panel -->
+    <div id="authPanel" class="centered-panel">
+      <div id="loginBox">
+        <div class="form-title">Login</div>
+        <div class="error-msg" id="loginError"></div>
+        <div class="input-group">
+          <label for="loginEmail">Email</label>
+          <input type="email" id="loginEmail" placeholder="Email" required />
+        </div>
+        <div class="input-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" placeholder="Password" required />
+        </div>
+        <button class="form-btn" id="loginBtn">Login</button>
+        <span class="toggle-link" onclick="toggleAuthForm('signup')">New user? Sign up</span>
+      </div>
+      <div id="signupBox" style="display:none;">
+        <div class="form-title">Sign Up</div>
+        <div class="error-msg" id="signupError"></div>
+        <div class="input-group">
+          <label for="signupEmail">Email</label>
+          <input type="email" id="signupEmail" placeholder="Email" required />
+        </div>
+        <div class="input-group">
+          <label for="signupPassword">Password</label>
+          <input type="password" id="signupPassword" placeholder="Set Password" required />
+        </div>
+        <button class="form-btn" id="signupBtn">Sign Up</button>
+        <span class="toggle-link" onclick="toggleAuthForm('login')">Already have an account? Login</span>
+      </div>
+    </div>
+    <!-- Game Area (hidden until login) -->
+    <div id="gameArea" class="game-area hide">
+      <!-- Game Stats Buttons -->
+      <div style="display:flex;gap:10px;justify-content:center;margin-bottom:10px;">
+        <button class="form-btn" id="showProfitLossBtn" style="max-width:140px;">Profit/Loss</button>
+        <button class="form-btn" id="showBetHistoryBtn" style="max-width:140px;">Bet History</button>
+        <button class="form-btn" id="showCrashHistoryBtn" style="max-width:140px;">Aviator Crashes</button>
+      </div>
+      <div id="profitLossPanel" class="history-list hide"></div>
+      <div id="betHistoryPanel" class="history-list hide"></div>
+      <div id="crashHistoryPanel" class="history-list hide"></div>
+      <div class="top-bar">
+        <span class="balance" id="userBalance">Balance: ₹0</span>
+        <span class="admin-icon" id="adminIcon" title="Admin Settings">&#9881;</span>
+        <button id="logoutBtn" style="margin-left:16px;padding:8px 16px;font-size:1rem;background:var(--danger);color:#fff;border:none;border-radius:6px;cursor:pointer;">Logout</button>
+      </div>
+      <!-- Aviator Graph -->
+      <canvas id="aviatorGraph" width="420" height="120" style="background:#181818;border-radius:10px;box-shadow:0 0 8px orange;margin-bottom:8px;"></canvas>
+      <div class="multiplier-anim" id="multiplierText">1.00x</div>
+      <div style="text-align:center;font-size:1.2rem;color:orange;margin-bottom:10px;">
+        <span id="aviatorNumber">1.00x</span>
+      </div>
+      <div class="bet-controls">
+        <input type="number" id="betAmount" min="1" placeholder="Enter bet amount (₹)" />
+        <button id="betBtn">Bet for Next Round</button>
+        <button id="cashoutBtn" style="display:none;">Cashout</button>
+        <div class="auto-bet-controls">
+          <label>
+            <input type="checkbox" id="autoBetToggle" />
+            Auto Bet
+          </label>
+          <input type="number" id="autoBetTarget" min="1.01" step="0.01" placeholder="Auto Cashout at (e.g. 2.00x)" style="width:120px;" />
+        </div>
+      </div>
+      <div id="gameMessage" style="text-align:center;font-size:1.2rem;font-weight:bold;margin-bottom:10px;"></div>
+      <div class="admin-panel hide" id="adminPanel">
+        <label style="font-size:1.2rem;color:orange;">Aviator Admin Controls</label>
+        <div style="margin-bottom:8px;">
+          <strong>Current Multiplier:</strong> <span id="adminCurrentMultiplier">1.00x</span><br>
+          <strong>Crash Multiplier:</strong> <span id="adminCrashMultiplier">-</span><br>
+          <strong>Round Status:</strong> <span id="adminRoundStatus">Waiting</span>
+        </div>
+        <label>Set Manual Crash Multiplier:</label>
+        <input type="number" id="manualCrashInput" step="0.01" min="1" />
+        <button id="setCrashBtn">Set Crash</button>
+        <button id="forceCrashBtn">Force Crash Now</button>
+        <hr>
+        <div id="adminPanelUsers"></div>
+        <div id="adminPanelDeposits"></div>
+        <div id="adminPanelWithdrawals"></div>
+      </div>
+    <!-- Deposit/Withdraw Buttons -->
+    <div style="display:flex;gap:16px;justify-content:center;margin:18px 0 0 0;">
+      <button class="form-btn" id="depositBtn" style="max-width:160px;">Deposit</button>
+      <button class="form-btn" id="withdrawBtn" style="max-width:160px;">Withdraw</button>
+    </div>
+    <!-- Deposit Dialog -->
+    <div id="depositDialog" class="centered-panel hide" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;max-width:350px;">
+      <div class="form-title">Deposit Rupees</div>
+      <img src="qr.png" alt="Deposit QR" style="width:180px;height:180px;border-radius:12px;margin-bottom:10px;box-shadow:0 0 12px orange;"/>
+      <div style="display:flex;gap:10px;justify-content:center;margin-bottom:10px;">
+        <button class="form-btn" type="button" style="padding:6px 12px;font-size:1rem;max-width:90px;" onclick="setDepositAmount(200)">₹200</button>
+        <button class="form-btn" type="button" style="padding:6px 12px;font-size:1rem;max-width:90px;" onclick="setDepositAmount(500)">₹500</button>
+        <button class="form-btn" type="button" style="padding:6px 12px;font-size:1rem;max-width:90px;" onclick="setDepositAmount(1000)">₹1000</button>
+        <button class="form-btn" type="button" style="padding:6px 12px;font-size:1rem;max-width:90px;" onclick="setDepositAmount(2000)">₹2000</button>
+      </div>
+      <div class="input-group">
+        <label for="depositAmount">Amount (min ₹5)</label>
+        <input type="number" id="depositAmount" min="5" placeholder="Enter amount to deposit" style="width:100%;"/>
+      </div>
+      <div class="success-msg" id="depositSuccess"></div>
+      <div class="error-msg" id="depositError"></div>
+      <button class="form-btn" id="submitDepositBtn">Request Deposit</button>
+      <button class="form-btn" type="button" style="background:#333;color:#fff;" onclick="closeDepositDialog()">Cancel</button>
+    </div>
+    <!-- Withdraw Dialog -->
+    <div id="withdrawDialog" class="centered-panel hide" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;max-width:350px;">
+      <div class="form-title">Withdraw Rupees</div>
+      <div class="input-group">
+        <label for="withdrawAmount">Amount (min ₹200)</label>
+        <input type="number" id="withdrawAmount" min="200" placeholder="Enter amount to withdraw" style="width:100%;"/>
+      </div>
+      <div class="input-group">
+        <label for="withdrawUpi">Your UPI ID</label>
+        <input type="text" id="withdrawUpi" placeholder="e.g. user@upi" style="width:100%;"/>
+      </div>
+      <div class="success-msg" id="withdrawSuccess"></div>
+      <div class="error-msg" id="withdrawError"></div>
+      <button class="form-btn" id="submitWithdrawBtn">Request Withdraw</button>
+      <button class="form-btn" type="button" style="background:#333;color:#fff;" onclick="closeWithdrawDialog()">Cancel</button>
+    </div>
+      </div>
+    <!-- Deposit/Withdraw History Panels -->
+    <div id="depositHistoryPanel" class="history-list hide"></div>
+    <div id="withdrawHistoryPanel" class="history-list hide"></div>
+    </div>
+    <!-- History and Transaction Panels (to be filled by JS) -->
+    <div id="historyList" class="history-list hide"></div>
+    <div id="transactionList" class="transaction-list hide"></div>
+  </main>
+  <script>
+// Place this at the very top of your <script> block, before any other code:
+function toggleAuthForm(form) {
+  if (form === 'signup') {
+    document.getElementById('loginBox').style.display = 'none';
+    document.getElementById('signupBox').style.display = '';
+    setText('signupError', '');
+    clearInputs('signupEmail','signupPassword');
+  } else {
+    document.getElementById('loginBox').style.display = '';
+    document.getElementById('signupBox').style.display = 'none';
+    setText('loginError', '');
+    clearInputs('loginEmail','loginPassword');
+  }
+}
+window.toggleAuthForm = toggleAuthForm;
+
+    // --- Global Variables (declare only once at the top) ---
+  let currentUser = null;
+  let currentUid = null;
+  let isAdmin = false;
+  let roundActive = false;
+  let betPlaced = false;
+  let betAmount = 0;
+  let multiplier = 1.00;
+  let crashMultiplier = null;
+  let interval = null;
+  let aviatorInterval = null; // <-- Fix ReferenceError
+  let cashedOut = false;
+  let userBalance = 0;
+  let nextBetAmount = 0;
+  let autoBetActive = false;
+  let autoBetTarget = 0;
+  let autoBetCount = 0;
+  let roundHistory = [];
+  let aviatorGraphData = [];
+  let loginTimeout = null;
+  // ...existing code...
+
+    // --- UI Panel Show/Hide Helpers ---
+    function hideAllPanels() {
+      hide('historyList');
+      hide('transactionList');
+      hide('depositHistoryPanel');
+      hide('withdrawHistoryPanel');
+      hide('profitLossPanel');
+      hide('betHistoryPanel');
+      hide('crashHistoryPanel');
+    }
+    // --- Firebase Config ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyDE1OmK-T0Lv5qCk6wO0teI0MwCbyZ20BI",
+      authDomain: "aviator-630d4.firebaseapp.com",
+      databaseURL: "https://aviator-630d4-default-rtdb.firebaseio.com",
+      projectId: "aviator-630d4",
+      storageBucket: "aviator-630d4.appspot.com",
+      messagingSenderId: "803342184015",
+      appId: "1:803342184015:web:bd61b472d0327ef4fa043a"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+    const ADMIN_EMAIL = "kmogha85@gmail.com";
+
+    // --- UI Helpers ---
+    function show(id) { document.getElementById(id).classList.remove('hide'); }
+    function hide(id) { document.getElementById(id).classList.add('hide'); }
+    function setText(id, text) { document.getElementById(id).textContent = text; }
+    function setHTML(id, html) { document.getElementById(id).innerHTML = html; }
+    function clearInputs(...ids) { ids.forEach(i => { let el = document.getElementById(i); if (el) el.value = ''; }); }
+
+    // --- Auth UI Logic ---
+    document.getElementById('logoutBtn').onclick = async function() {
+      await auth.signOut();
+      show('authPanel');
+      hide('gameArea');
+    };
+    // Attach event listeners directly (not inside DOMContentLoaded)
+    document.getElementById('loginBtn').onclick = async function() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      setText('loginError', '');
+      if (!email || !password) {
+        setText('loginError', 'Please enter both email and password.');
+        return;
+      }
+      try {
+        if (loginTimeout) clearTimeout(loginTimeout);
+        loginTimeout = setTimeout(() => {
+          setText('loginError', 'Login is taking too long. Please check your connection or try again.');
+        }, 8000);
+        await auth.signInWithEmailAndPassword(email, password);
+        clearTimeout(loginTimeout);
+      } catch (err) {
+        clearTimeout(loginTimeout);
+        let msg = 'Login failed. ';
+        if (err.code === 'auth/network-request-failed') {
+          msg += 'Network error. Please check your internet connection.';
+        } else if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+          msg += 'Invalid email or password.';
+        } else if (err.code === 'auth/invalid-email') {
+          msg += 'Invalid email format.';
+        } else if (err.code === 'auth/too-many-requests') {
+          msg += 'Too many failed attempts. Please try again later.';
+        } else {
+          msg += err.message;
+        }
+        setText('loginError', msg);
+        console.error('Login error:', err);
+      }
+    };
+
+    document.getElementById('signupBtn').onclick = async function() {
+      const email = document.getElementById('signupEmail').value.trim();
+      const password = document.getElementById('signupPassword').value;
+      setText('signupError', '');
+      if (!email || !password) {
+        setText('signupError', 'Please enter both email and password.');
+        return;
+      }
+      try {
+        const userCred = await auth.createUserWithEmailAndPassword(email, password);
+        const uid = userCred.user.uid;
+        await db.ref("users/" + uid).set({
+          email,
+          balance: 1000,
+          isAdmin: email.toLowerCase() === ADMIN_EMAIL,
+          blocked: false
+        });
+      } catch (err) {
+        let msg = 'Signup failed. ';
+        if (err.code === 'auth/email-already-in-use') {
+          msg += 'Email already in use. Please log in.';
+        } else if (err.code === 'auth/invalid-email') {
+          msg += 'Invalid email format.';
+        } else if (err.code === 'auth/weak-password') {
+          msg += 'Password should be at least 6 characters.';
+        } else {
+          msg += err.message;
+        }
+        setText('signupError', msg);
+        console.error('Signup error:', err);
+      }
+    };
+    document.getElementById('adminIcon').onclick = () => {
+      const panel = document.getElementById('adminPanel');
+      if (panel.classList.contains('hide')) {
+        panel.classList.remove('hide');
+        show('transactionList');
+        loadAdminPanel();
+      } else {
+        panel.classList.add('hide');
+        hide('transactionList');
+      }
+    };
+
+    // --- Aviator Game Logic ---
+    function startGame(balance) {
+      userBalance = balance;
+      resetRound();
+      document.getElementById('betBtn').disabled = false;
+      document.getElementById('betBtn').textContent = 'Bet for Next Round';
+      document.getElementById('cashoutBtn').style.display = 'none';
+      setText('multiplierText', '1.00x');
+      document.getElementById('betAmount').value = '';
+      document.getElementById('autoBetToggle').checked = false;
+      document.getElementById('autoBetTarget').value = '';
+      autoBetActive = false;
+      autoBetTarget = 0;
+      autoBetCount = 0;
+      // Admin controls
+      if (isAdmin) {
+        document.getElementById('setCrashBtn').onclick = async () => {
+          const val = parseFloat(document.getElementById('manualCrashInput').value);
+          if (isNaN(val) || val < 1) return setGameMessage('Enter valid multiplier', 'danger');
+          crashMultiplier = val;
+          setGameMessage('Manual crash multiplier set for next round!', 'success');
+        };
+        document.getElementById('forceCrashBtn').onclick = () => {
+          if (roundActive) {
+            crashMultiplier = multiplier;
+            setGameMessage('Crash will happen immediately!', 'danger');
+          }
+        };
+      }
+      // Deposit/Withdraw buttons
+      document.getElementById('depositBtn').onclick = openDepositDialog;
+      document.getElementById('withdrawBtn').onclick = openWithdrawDialog;
+      // Reset dialogs
+      closeDepositDialog();
+      closeWithdrawDialog();
+      // Start Aviator always running
+      if (!window.aviatorInterval) startAviatorLoop();
+      // Clear messages
+      setGameMessage('', '');
+    }
+
+    function resetRound() {
+      roundActive = false;
+      betPlaced = false;
+      betAmount = 0;
+      multiplier = 1.00;
+      crashMultiplier = null;
+      cashedOut = false;
+      clearInterval(interval);
+      document.getElementById('betBtn').disabled = false;
+      document.getElementById('betBtn').textContent = 'Bet for Next Round';
+      document.getElementById('cashoutBtn').style.display = 'none';
+      setText('multiplierText', '1.00x');
+      setText('aviatorNumber', '1.00x');
+      setGameMessage('', '');
+    }
+
+    document.getElementById('autoBetToggle').onchange = function() {
+      autoBetActive = this.checked;
+      autoBetTarget = parseFloat(document.getElementById('autoBetTarget').value) || 0;
+      autoBetCount = 0;
+    };
+
+    document.getElementById('betBtn').onclick = async function() {
+      if (roundActive) return;
+      nextBetAmount = parseFloat(document.getElementById('betAmount').value);
+      if (isNaN(nextBetAmount) || nextBetAmount < 1) {
+        setGameMessage('Enter a valid bet amount (₹1 or more)', 'danger');
+        return;
+      }
+      if (nextBetAmount > userBalance) {
+        setGameMessage('Insufficient balance', 'danger');
+        return;
+      }
+      betPlaced = true;
+      document.getElementById('betBtn').disabled = true;
+      document.getElementById('betBtn').textContent = 'Bet Placed! Wait for Round';
+      setTimeout(() => {
+        beginRound();
+      }, 1200);
+    };
+
+    function beginRound() {
+      if (!betPlaced) return;
+      roundActive = true;
+      betAmount = nextBetAmount;
+      userBalance -= betAmount;
+      updateBalance();
+      multiplier = 1.00;
+      setText('multiplierText', multiplier.toFixed(2) + 'x');
+      setText('aviatorNumber', multiplier.toFixed(2) + 'x');
+      document.getElementById('cashoutBtn').style.display = '';
+      document.getElementById('betBtn').disabled = true;
+      document.getElementById('betBtn').textContent = 'Round in Progress...';
+      cashedOut = false;
+      // Start multiplier (slower)
+      interval = setInterval(() => {
+        multiplier += Math.random() * 0.025 + 0.005; // much slower
+        setText('multiplierText', multiplier.toFixed(2) + 'x');
+        setText('aviatorNumber', multiplier.toFixed(2) + 'x');
+        drawAviatorGraph(multiplier);
+        // Auto bet cashout
+        if (autoBetActive && autoBetTarget && multiplier >= autoBetTarget && !cashedOut) {
+          cashedOut = true;
+          endRound(true);
+          return;
+        }
+        // Crash logic
+        let shouldCrash = false;
+        if (crashMultiplier && multiplier >= crashMultiplier) shouldCrash = true;
+        if (!crashMultiplier && multiplier >= (Math.random() * 10 + 1.5)) shouldCrash = true;
+        if (shouldCrash) {
+          endRound(false);
+        }
+      }, 120);
+    }
+
+    document.getElementById('cashoutBtn').onclick = function() {
+      if (!roundActive || cashedOut) return;
+      cashedOut = true;
+      endRound(true);
+    };
+
+    function endRound(win) {
+      clearInterval(interval);
+      roundActive = false;
+      document.getElementById('cashoutBtn').style.display = 'none';
+      let result = win ? 'win' : 'loss';
+      let cashedOutAt = win ? multiplier : null;
+      let winAmount = 0;
+      if (win) {
+        winAmount = Math.floor(betAmount * (cashedOutAt - 1));
+        userBalance += betAmount + winAmount;
+        setGameMessage(`You won! Multiplier: ${cashedOutAt.toFixed(2)}x | Winnings: ₹${winAmount}`, 'success');
+      } else {
+        setGameMessage('You lost!', 'danger');
+      }
+      updateBalance();
+      // Save bet
+      if (currentUid) {
+        const roundId = 'round_' + Date.now();
+        db.ref('bets/' + roundId).set({
+          userId: currentUid,
+          betAmount,
+          cashedOutAt,
+          result,
+          winAmount,
+          time: Date.now()
+        });
+        db.ref('users/' + currentUid + '/balance').set(userBalance);
+        // Add to local round history
+        roundHistory.unshift({ betAmount, cashedOutAt, result, winAmount, time: Date.now() });
+        if (roundHistory.length > 20) roundHistory.pop();
+      }
+      // Show timer in aviator multiplier area for next round
+      let waitTime = 7;
+      setText('multiplierText', 'Next round starts in ' + waitTime);
+      setText('aviatorNumber', 'Next round in ' + waitTime + 's');
+      let timerInterval = setInterval(() => {
+        waitTime--;
+        setText('multiplierText', 'Next round starts in ' + waitTime);
+        setText('aviatorNumber', 'Next round in ' + waitTime + 's');
+        if (waitTime <= 0) {
+          clearInterval(timerInterval);
+          resetRound();
+        }
+      }, 1000);
+    }
+
+    function updateBalance() {
+      setText('userBalance', `Balance: ₹${userBalance}`);
+    }
+
+    // --- History Panel ---
+    document.getElementById('userBalance').onclick = showHistory;
+    function showHistory() {
+      let html = '<h3>Your Game History</h3>';
+      if (!roundHistory.length) html += '<div>No rounds played yet.</div>';
+      else {
+        html += '<table style="width:100%;color:#fff;font-size:1rem;"><tr><th>Bet</th><th>Result</th><th>Multiplier</th><th>Winnings</th></tr>';
+        roundHistory.forEach(bet => {
+          html += `<tr><td>₹${bet.betAmount}</td><td>${bet.result === 'win' ? '<span style=\'color:var(--success)\'>Win</span>' : '<span style=\'color:var(--danger)\'>Loss</span>'}</td><td>${bet.cashedOutAt ? bet.cashedOutAt.toFixed(2) + 'x' : '-'}</td><td>${bet.winAmount ? '₹'+bet.winAmount : '-'}</td></tr>`;
+        });
+        html += '</table>';
+      }
+      setHTML('historyList', html);
+      hideAllPanels();
+      show('historyList');
+    }
+    // Hide history on click outside
+    document.body.addEventListener('click', function(e) {
+      if (e.target.id !== 'userBalance' && !document.getElementById('historyList').contains(e.target)) {
+        hide('historyList');
+      }
+    });
+
+
+    // --- Deposit/Withdraw Dialog Logic ---
+    function openDepositDialog() {
+      document.getElementById('depositDialog').classList.remove('hide');
+      document.getElementById('depositAmount').value = '';
+      setText('depositError', '');
+      setText('depositSuccess', '');
+    }
+    function closeDepositDialog() {
+      document.getElementById('depositDialog').classList.add('hide');
+      setText('depositError', '');
+      setText('depositSuccess', '');
+    }
+    function setDepositAmount(val) {
+      document.getElementById('depositAmount').value = val;
+    }
+    document.getElementById('submitDepositBtn').onclick = async function() {
+      const amount = parseInt(document.getElementById('depositAmount').value);
+      setText('depositError', '');
+      setText('depositSuccess', '');
+      if (isNaN(amount) || amount < 5) {
+        setText('depositError', 'Minimum deposit is ₹5');
+        return;
+      }
+      // Create deposit request
+      await db.ref('transactions/deposits').push({
+        userId: currentUid,
+        amount,
+        status: 'pending',
+        time: Date.now()
+      });
+      setText('depositSuccess', 'Deposit request sent! Wait for admin approval.');
+      loadDepositHistory();
+      setTimeout(closeDepositDialog, 1800);
+    };
+
+    function openWithdrawDialog() {
+      document.getElementById('withdrawDialog').classList.remove('hide');
+      document.getElementById('withdrawAmount').value = '';
+      document.getElementById('withdrawUpi').value = '';
+      setText('withdrawError', '');
+      setText('withdrawSuccess', '');
+    }
+    function closeWithdrawDialog() {
+      document.getElementById('withdrawDialog').classList.add('hide');
+      setText('withdrawError', '');
+      setText('withdrawSuccess', '');
+    }
+    document.getElementById('submitWithdrawBtn').onclick = async function() {
+      const amount = parseInt(document.getElementById('withdrawAmount').value);
+      const upi = document.getElementById('withdrawUpi').value.trim();
+      setText('withdrawError', '');
+      setText('withdrawSuccess', '');
+      if (isNaN(amount) || amount < 200) {
+        setText('withdrawError', 'Minimum withdrawal is ₹200');
+        return;
+      }
+      if (amount > userBalance) {
+        setText('withdrawError', 'Cannot withdraw more than your balance');
+        return;
+      }
+      if (!upi || !/^[\w.\-]+@[\w.\-]+$/.test(upi)) {
+        setText('withdrawError', 'Enter a valid UPI ID');
+        return;
+      }
+      // Create withdraw request
+      await db.ref('transactions/withdrawals').push({
+        userId: currentUid,
+        upi,
+        amount,
+        status: 'pending',
+        time: Date.now()
+      });
+      setText('withdrawSuccess', 'Withdraw request sent! Wait for admin approval.');
+      loadWithdrawHistory();
+      setTimeout(closeWithdrawDialog, 1800);
+    };
+
+    // --- Admin Panel (user management, deposit/withdraw) ---
+    // --- Deposit/Withdraw History ---
+    async function loadDepositHistory() {
+      if (!currentUid) return;
+      let snap = await db.ref('transactions/deposits').orderByChild('userId').equalTo(currentUid).once('value');
+      let html = '<h3>Your Deposit Requests</h3>';
+      let found = false;
+      snap.forEach(s => {
+        let req = s.val();
+        found = true;
+        html += `<div style="margin-bottom:8px;">Amount: ₹${req.amount} | Status: <span style="color:${req.status==='pending'?'orange':(req.status==='accepted'?'#4caf50':'#ff6666')}">${req.status}</span></div>`;
+      });
+      if (!found) html += '<div>No deposit requests yet.</div>';
+      setHTML('depositHistoryPanel', html);
+      hideAllPanels();
+      show('depositHistoryPanel');
+    }
+    async function loadWithdrawHistory() {
+      if (!currentUid) return;
+      let snap = await db.ref('transactions/withdrawals').orderByChild('userId').equalTo(currentUid).once('value');
+      let html = '<h3>Your Withdraw Requests</h3>';
+      let found = false;
+      snap.forEach(s => {
+        let req = s.val();
+        found = true;
+        html += `<div style="margin-bottom:8px;">Amount: ₹${req.amount} | UPI: ${req.upi} | Status: <span style="color:${req.status==='pending'?'orange':(req.status==='accepted'?'#4caf50':'#ff6666')}">${req.status}</span></div>`;
+      });
+      if (!found) html += '<div>No withdraw requests yet.</div>';
+      setHTML('withdrawHistoryPanel', html);
+      hideAllPanels();
+      show('withdrawHistoryPanel');
+    }
+    // Show deposit/withdraw history on button click
+    document.getElementById('depositBtn').addEventListener('contextmenu', function(e){ e.preventDefault(); loadDepositHistory(); });
+    document.getElementById('withdrawBtn').addEventListener('contextmenu', function(e){ e.preventDefault(); loadWithdrawHistory(); });
+    if (isAdmin) {
+      // Load users and transactions
+      loadAdminPanel();
+      // Listen for round updates to show live info in admin panel
+      db.ref('aviatorRound').on('value', snap => {
+        const round = snap.val();
+        if (!round) return;
+        document.getElementById('adminCurrentMultiplier').textContent = round.multiplier.toFixed(2) + 'x';
+        document.getElementById('adminCrashMultiplier').textContent = round.crash ? round.crash.toFixed(2) + 'x' : '-';
+        document.getElementById('adminRoundStatus').textContent = round.crashed ? 'Crashed' : 'Running';
+      });
+    }
+
+    async function loadAdminPanel() {
+      // Users Table
+      let usersSnap = await db.ref('users').once('value');
+      let users = [];
+      usersSnap.forEach(snap => {
+        let u = snap.val();
+        u.uid = snap.key;
+        users.push(u);
+      });
+      let usersHtml = '<h3>All Users</h3>';
+      usersHtml += '<table style="width:100%;color:#fff;font-size:1rem;"><tr><th>Email</th><th>Balance</th><th>Admin</th><th>Blocked</th><th>Actions</th></tr>';
+      users.forEach(u => {
+        usersHtml += `<tr${u.blocked ? ' style="background:#3a1a1a;color:#ff6666;"' : ''}>
+          <td>${u.email}</td>
+          <td>₹${u.balance}</td>
+          <td>${u.isAdmin ? 'Yes' : 'No'}</td>
+          <td>${u.blocked ? 'Yes' : 'No'}</td>
+          <td>
+            <button onclick="blockUser('${u.uid}', ${u.blocked})">${u.blocked ? 'Unblock' : 'Block'}</button>
+            ${u.email !== ADMIN_EMAIL ? `<button onclick="toggleAdmin('${u.uid}', ${u.isAdmin}, '${u.email}')">${u.isAdmin ? 'Remove Admin' : 'Promote to Admin'}</button>` : '<span style="color:orange;font-weight:bold;">Main Admin</span>'}
+          </td>
+        </tr>`;
+      });
+      usersHtml += '</table>';
+      setHTML('adminPanelUsers', usersHtml);
+
+      // Deposit Requests
+      let depSnap = await db.ref('transactions/deposits').once('value');
+      let depHtml = '<h3>Deposit Requests</h3>';
+      depHtml += '<table style="width:100%;color:#fff;font-size:1rem;"><tr><th>User</th><th>Amount</th><th>Status</th><th>Actions</th></tr>';
+      depSnap.forEach(snap => {
+        let req = snap.val();
+        let uname = users.find(u => u.uid === req.userId)?.email || req.userId;
+        depHtml += `<tr><td>${uname}</td><td>₹${req.amount || '?'}</td><td>${req.status}</td><td>${req.status === 'pending' ? `<button onclick=\"acceptDeposit('${snap.key}','${req.userId}',${req.amount||1000})\">Accept</button> <button onclick=\"rejectDeposit('${snap.key}')\">Reject</button>` : ''}</td></tr>`;
+      });
+      depHtml += '</table>';
+      setHTML('adminPanelDeposits', depHtml);
+
+      // Withdraw Requests
+      let wSnap = await db.ref('transactions/withdrawals').once('value');
+      let wHtml = '<h3>Withdraw Requests</h3>';
+      wHtml += '<table style="width:100%;color:#fff;font-size:1rem;"><tr><th>User</th><th>UPI ID</th><th>Amount</th><th>Status</th><th>Actions</th></tr>';
+      wSnap.forEach(snap => {
+        let req = snap.val();
+        let uname = users.find(u => u.uid === req.userId)?.email || req.userId;
+        wHtml += `<tr><td>${uname}</td><td>${req.upi||'-'}</td><td>₹${req.amount}</td><td>${req.status}</td><td>${req.status === 'pending' ? `<button onclick=\"acceptWithdraw('${snap.key}','${req.userId}',${req.amount})\">Accept</button> <button onclick=\"rejectWithdraw('${snap.key}')\">Reject</button>` : ''}</td></tr>`;
+      });
+      wHtml += '</table>';
+      setHTML('adminPanelWithdrawals', wHtml);
+    }
+
+    window.blockUser = async function(uid, blocked) {
+      await db.ref('users/' + uid + '/blocked').set(!blocked);
+      loadAdminPanel();
+    };
+    window.toggleAdmin = async function(uid, isAdmin, email) {
+      if (email === ADMIN_EMAIL) {
+        alert('Main admin cannot be demoted.');
+        return;
+      }
+      await db.ref('users/' + uid + '/isAdmin').set(!isAdmin);
+      loadAdminPanel();
+    };
+
+    async function loadTransactions() {
+      // Deposits
+      let depSnap = await db.ref('transactions/deposits').once('value');
+      let usersSnap = await db.ref('users').once('value');
+      let users = {};
+      usersSnap.forEach(snap => { users[snap.key] = snap.val(); });
+      let html = '<h3>Deposit Requests</h3>';
+      html += '<table style="width:100%;color:#fff;font-size:1rem;"><tr><th>User</th><th>Amount</th><th>Status</th><th>Actions</th></tr>';
+      depSnap.forEach(snap => {
+        let req = snap.val();
+        let uname = users[req.userId]?.email || req.userId;
+        html += `<tr><td>${uname}</td><td>₹${req.amount || '?'}</td><td>${req.status}</td><td>${req.status === 'pending' ? `<button onclick=\"acceptDeposit('${snap.key}','${req.userId}',${req.amount||1000})\">Accept</button> <button onclick=\"rejectDeposit('${snap.key}')\">Reject</button>` : ''}</td></tr>`;
+      });
+      html += '</table>';
+      // Withdrawals
+      let wSnap = await db.ref('transactions/withdrawals').once('value');
+      html += '<h3>Withdraw Requests</h3>';
+      html += '<table style="width:100%;color:#fff;font-size:1rem;"><tr><th>User</th><th>UPI ID</th><th>Amount</th><th>Status</th><th>Actions</th></tr>';
+      wSnap.forEach(snap => {
+        let req = snap.val();
+        let uname = users[req.userId]?.email || req.userId;
+        html += `<tr><td>${uname}</td><td>${req.upi||'-'}</td><td>₹${req.amount}</td><td>${req.status}</td><td>${req.status === 'pending' ? `<button onclick=\"acceptWithdraw('${snap.key}','${req.userId}',${req.amount})\">Accept</button> <button onclick=\"rejectWithdraw('${snap.key}')\">Reject</button>` : ''}</td></tr>`;
+      });
+      html += '</table>';
+      setHTML('transactionList', html);
+      show('transactionList');
+    }
+    window.acceptDeposit = async function(key, userId, amount) {
+      await db.ref('transactions/deposits/' + key + '/status').set('accepted');
+      let balSnap = await db.ref('users/' + userId + '/balance').once('value');
+      let bal = balSnap.val() || 0;
+      await db.ref('users/' + userId + '/balance').set(bal + (amount || 1000));
+      loadTransactions();
+    };
+    window.rejectDeposit = async function(key) {
+      await db.ref('transactions/deposits/' + key + '/status').set('rejected');
+      loadTransactions();
+    };
+    window.acceptWithdraw = async function(key, userId, amount) {
+      let balSnap = await db.ref('users/' + userId + '/balance').once('value');
+      let bal = balSnap.val() || 0;
+      if (amount > bal) {
+        alert('Cannot withdraw more than user balance!');
+        await db.ref('transactions/withdrawals/' + key + '/status').set('rejected');
+        loadTransactions();
+        return;
+      }
+      await db.ref('transactions/withdrawals/' + key + '/status').set('accepted');
+      await db.ref('users/' + userId + '/balance').set(Math.max(0, bal - amount));
+      loadTransactions();
+    };
+    window.rejectWithdraw = async function(key) {
+      await db.ref('transactions/withdrawals/' + key + '/status').set('rejected');
+      loadTransactions();
+    };
+    // Show admin panel on gear click
+    document.getElementById('adminIcon').onclick = () => {
+      const panel = document.getElementById('adminPanel');
+      if (panel.classList.contains('hide')) {
+        panel.classList.remove('hide');
+        show('transactionList');
+        loadAdminPanel();
+      } else {
+        panel.classList.add('hide');
+        hide('transactionList');
+      }
+    };
+    // --- Global Game Stats (optional) ---
+    // --- Aviator Graph Drawing ---
+    // --- Profit/Loss Panel ---
+    function showProfitLoss() {
+      let totalWin = 0, totalLoss = 0, totalBet = 0;
+      roundHistory.forEach(bet => {
+        totalBet += bet.betAmount;
+        if (bet.result === 'win') totalWin += bet.winAmount;
+        else totalLoss += bet.betAmount;
+      });
+      let profit = totalWin - totalLoss;
+      let html = '<h3>Profit / Loss</h3>';
+      html += `<div>Total Bets: ₹${totalBet}</div>`;
+      html += `<div>Total Winnings: ₹${totalWin}</div>`;
+      html += `<div>Total Losses: ₹${totalLoss}</div>`;
+      html += `<div style="margin-top:8px;font-weight:bold;">Net Profit/Loss: <span style="color:${profit>=0?'#4caf50':'#ff6666'}">₹${profit}</span></div>`;
+      setHTML('profitLossPanel', html);
+      hideAllPanels();
+      show('profitLossPanel');
+    }
+
+    // --- Bet History Panel ---
+    function showBetHistory() {
+      let html = '<h3>Bet History</h3>';
+      if (!roundHistory.length) html += '<div>No bets yet.</div>';
+      else {
+        html += '<table style="width:100%;color:#fff;font-size:1rem;"><tr><th>Time</th><th>Bet</th><th>Result</th><th>Multiplier</th><th>Winnings</th></tr>';
+        roundHistory.forEach(bet => {
+          let d = new Date(bet.time);
+          html += `<tr><td>${d.toLocaleTimeString()}</td><td>₹${bet.betAmount}</td><td>${bet.result==='win'?'<span style=\'color:#4caf50\'>Win</span>':'<span style=\'color:#ff6666\'>Loss</span>'}</td><td>${bet.cashedOutAt?bet.cashedOutAt.toFixed(2)+'x':'-'}</td><td>${bet.winAmount?'₹'+bet.winAmount:'-'}</td></tr>`;
+        });
+        html += '</table>';
+      }
+      setHTML('betHistoryPanel', html);
+      hideAllPanels();
+      show('betHistoryPanel');
+    }
+
+    // --- Aviator Crash History Panel ---
+    function showCrashHistory() {
+      let html = '<h3>Last 5 Aviator Crashes</h3>';
+      if (!aviatorCrashHistory.length) html += '<div>No crash data yet.</div>';
+      else {
+        html += '<ul style="color:orange;font-size:1.2rem;">';
+        aviatorCrashHistory.forEach((cr,i) => {
+          html += `<li>Crash #${i+1}: ${cr.toFixed(2)}x</li>`;
+        });
+        html += '</ul>';
+      }
+      setHTML('crashHistoryPanel', html);
+      hideAllPanels();
+      show('crashHistoryPanel');
+    }
+
+    // --- Panel Button Event Listeners ---
+    document.getElementById('showProfitLossBtn').onclick = showProfitLoss;
+    document.getElementById('showBetHistoryBtn').onclick = showBetHistory;
+    document.getElementById('showCrashHistoryBtn').onclick = showCrashHistory;
+
+    // --- End of UI Panels ---
+    function drawAviatorGraph(mult) {
+      const canvas = document.getElementById('aviatorGraph');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      // Save last 100 points
+      aviatorGraphData.push(mult);
+      if (aviatorGraphData.length > 100) aviatorGraphData.shift();
+      ctx.beginPath();
+      ctx.moveTo(0,canvas.height-10);
+      for (let i=0;i<aviatorGraphData.length;i++) {
+        let y = canvas.height-10 - (aviatorGraphData[i]-1)*30;
+        if (y < 10) y = 10;
+        ctx.lineTo(i*(canvas.width/100), y);
+      }
+      ctx.strokeStyle = 'orange';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      // Draw current multiplier
+      ctx.fillStyle = 'orange';
+      ctx.font = 'bold 1.2rem Segoe UI';
+      ctx.fillText(mult.toFixed(2)+'x', canvas.width-70, 30);
+    }
+
+    // --- Always Running Aviator ---
+  // ...existing code...
+    // --- Global Aviator Game Loop ---
+    // Firebase path for global round state
+    const ROUND_PATH = 'aviatorRound';
+    function startAviatorLoop() {
+      // Only one client (admin or first user) should run the loop and update Firebase
+      // All users listen for updates
+      db.ref(ROUND_PATH).on('value', snap => {
+        const round = snap.val();
+        if (!round) return;
+        if (round.waiting) {
+          setText('multiplierText', 'Next round starts in ' + round.waitTime);
+          setText('aviatorNumber', 'Next round in ' + round.waitTime + 's');
+        } else if (round.crashed) {
+          setText('multiplierText', 'Crashed!');
+          setText('aviatorNumber', 'Crashed!');
+        } else if (!round.waiting && !round.crashed) {
+          drawAviatorGraph(round.multiplier);
+          setText('multiplierText', round.multiplier.toFixed(2)+'x');
+          setText('aviatorNumber', round.multiplier.toFixed(2)+'x');
+        }
+        // Autobet logic
+        if (!round.waiting && !round.crashed && autoBetActive && autoBetTarget && round.multiplier >= autoBetTarget && !cashedOut && roundActive) {
+          cashedOut = true;
+          endRound(true);
+        }
+        // Update crash history
+        if (round.crashed && (aviatorCrashHistory[0] !== round.multiplier)) {
+          aviatorCrashHistory.unshift(round.multiplier);
+          if (aviatorCrashHistory.length > 5) aviatorCrashHistory.pop();
+        }
+      });
+      // Only admin runs the loop and updates Firebase
+      if (!isAdmin) return;
+      // Admin runs the loop and updates Firebase
+      if (aviatorInterval) return;
+      let globalMult = 1.00;
+      let globalCrash = crashMultiplier || (Math.random() < 0.05 ? (Math.random()*30+2) : (Math.random()*2+1.1));
+      let crashed = false;
+      let waiting = false;
+      let waitTime = 0;
+      aviatorInterval = setInterval(async () => {
+        if (crashed) {
+          // Start waiting period for next round
+          waiting = true;
+          waitTime = 7;
+          await db.ref(ROUND_PATH).set({ multiplier: globalMult, crash: globalCrash, crashed: true, waiting: true, waitTime });
+          let waitInterval = setInterval(async () => {
+            waitTime--;
+            await db.ref(ROUND_PATH).set({ multiplier: globalMult, crash: globalCrash, crashed: true, waiting: true, waitTime });
+            if (waitTime <= 0) {
+              clearInterval(waitInterval);
+              // Start new round
+              globalMult = 1.00;
+              globalCrash = crashMultiplier || (Math.random() < 0.05 ? (Math.random()*30+2) : (Math.random()*2+1.1));
+              crashed = false;
+              waiting = false;
+              await db.ref(ROUND_PATH).set({ multiplier: globalMult, crash: globalCrash, crashed: false, waiting: false, waitTime: 0 });
+            }
+          }, 1000);
+        }
+        if (!waiting && !crashed) {
+          globalMult += Math.random()*0.025+0.005;
+          // Check for forced crash
+          if (crashMultiplier && globalMult >= crashMultiplier) {
+            globalCrash = crashMultiplier;
+          }
+          // Update Firebase
+          await db.ref(ROUND_PATH).set({ multiplier: globalMult, crash: globalCrash, crashed: false, waiting: false, waitTime: 0 });
+          // Only update graph and multiplier when round is running
+          drawAviatorGraph(globalMult);
+          setText('multiplierText', globalMult.toFixed(2)+'x');
+          setText('aviatorNumber', globalMult.toFixed(2)+'x');
+          if (globalMult >= globalCrash) {
+            crashed = true;
+            // The next tick will start the waiting period
+          }
+        }
+      }, 120);
+    }
+
+    // --- Game Message Helper ---
+    function setGameMessage(msg, type) {
+      let el = document.getElementById('gameMessage');
+      el.textContent = msg;
+      el.style.color = type==='success' ? '#4caf50' : (type==='danger' ? '#ff6666' : 'orange');
+    }
+    // You can add a stats panel for total bets, wins, users, etc. if desired.
+
+    // --- Auth State Change Listener ---
+    auth.onAuthStateChanged(async (user) => {
+      try {
+        if (user) {
+          currentUser = user;
+          currentUid = user.uid;
+          setText('loginError', '');
+          // Get user data
+          try {
+            const userSnap = await db.ref("users/" + currentUid).once("value");
+            let userData = userSnap.val();
+            if (!userData) {
+              // New user, create record
+              userData = { email: user.email, balance: 1000, isAdmin: user.email.toLowerCase() === ADMIN_EMAIL, blocked: false };
+              await db.ref("users/" + currentUid).set(userData);
+            }
+            if (userData.blocked) {
+              setText('loginError', 'Your account is blocked.');
+              show('authPanel');
+              hide('gameArea');
+              await auth.signOut();
+              return;
+            }
+            isAdmin = userData.isAdmin || user.email.toLowerCase() === ADMIN_EMAIL;
+            hide('authPanel');
+            show('gameArea');
+            setText('userBalance', `Balance: ₹${userData.balance}`);
+            if (isAdmin) {
+              document.getElementById('adminIcon').classList.add('visible');
+              document.getElementById('adminPanel').classList.add('hide'); // Always start hidden
+            } else {
+              document.getElementById('adminIcon').classList.remove('visible');
+              document.getElementById('adminPanel').classList.add('hide');
+            }
+            startGame(userData.balance);
+            loadDepositHistory();
+            loadWithdrawHistory();
+            setText('gameMessage', 'Welcome, ' + userData.email + (isAdmin ? ' (Admin)' : ''));
+          } catch (err) {
+            setText('loginError', 'Error loading user data for UID: ' + currentUid + '. ' + (err && err.message ? err.message : err));
+            show('authPanel');
+            hide('gameArea');
+            console.error('User data load error for UID', currentUid, err);
+            await auth.signOut();
+          }
+        } else {
+          show('authPanel');
+          hide('gameArea');
+          hidei;('historyList');
+          hide('transactionList');
+          hide('depositHistoryPanel');
+          hide('withdrawHistoryPanel');
+          setText('loginError', 'Please log in to continue.');
+        }
+      } catch (err) {
+        setText('loginError', 'Unexpected error: ' + (err && err.message ? err.message : err));
+        show('authPanel');
+        hide('gameArea');
+        console.error('Auth state error:', err);
+      }
+    });
+  </script>
+</body>
+</html>
