@@ -290,15 +290,12 @@
       padding: 18px;
       margin: 18px 0 0 0;
       box-shadow: 0 2px 12px var(--accent-dark);
-      display: none;
+      display: flex;
       flex-direction: column;
       gap: 12px;
       width: 100%;
       max-width: 340px;
       animation: fadeIn 0.7s;
-    }
-    .admin-panel.visible {
-      display: flex;
     }
     .admin-panel label {
       color: var(--accent);
@@ -1060,6 +1057,7 @@ window.toggleAuthForm = toggleAuthForm;
       let bal = balSnap.val() || 0;
       await db.ref('users/' + userId + '/balance').set(bal + (amount || 1000));
       loadTransactions();
+      if (isAdmin) loadAdminPanel();
     };
     window.rejectDeposit = async function(key) {
       await db.ref('transactions/deposits/' + key + '/status').set('rejected');
